@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KaffiPay</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0d0f14;
+  --surface: #141720;
+  --surface2: #1a1e2a;
+  --border: rgba(255,255,255,0.08);
+  --gold: #f5c842;
+  --gold-bg: rgba(245,200,66,0.12);
+  --gold-border: rgba(245,200,66,0.3);
+  --green: #2ecc71;
+  --muted: #6b7280;
+  --text: #e8eaf0;
+  --r: 14px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 60px;
+}
+
+.app {
+  width: 100%;
+  max-width: 460px;
+  padding: 0 16px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 0 20px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.logo-circle {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 0 18px rgba(245,200,66,0.4);
+  flex-shrink: 0;
+}
+.logo-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 21px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.logo-name span { color: var(--gold); }
+.logo-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.badge {
+  display: flex; align-items: center; gap: 5px;
+  border: 1px solid var(--gold-border);
+  background: var(--gold-bg);
+  padding: 6px 12px;
+  border-radius: 99px;
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.promo {
+  background: var(--surface2);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.promo-label { font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+.promo-code {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+
+.btn-copy {
+  background: var(--gold);
+  color: #0d0f14;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 15px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform .15s, box-shadow .15s;
+}
+.btn-copy:hover { transform: scale(1.04); box-shadow: 0 4px 16px rgba(245,200,66,0.4); }
+.btn-copy:active { transform: scale(.96); }
+
+.info-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.65;
+  margin-bottom: 18px;
+}
+.info-box strong { color: var(--text); }
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.tab {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  transition: all .2s;
+}
+.tab.active {
+  background: var(--surface2);
+  border-color: var(--gold-border);
+  color: var(--gold);
+}
+.tab:hover:not(.active) { color: var(--text); border-color: rgba(255,255,255,0.15); }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+}
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 3px;
+}
+.card-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+
+.pay-box {
+  background: var(--surface2);
+  border: 1px solid var(--gold-border);
+  border-radius: 12px;
+  padding: 14px 15px;
+  margin-bottom: 18px;
+}
+.pay-box-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.pay-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.pay-row + .pay-row {
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+  padding-top: 8px;
+}
+.pay-key { font-size: 13px; color: var(--muted); }
+.pay-val {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gold);
+  display: flex; align-items: center; gap: 8px;
+}
+.pay-val.name { font-size: 14px; color: var(--text); }
+.icon-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.icon-btn:hover { background: #252a38; }
+
+.instr-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 15px;
+  margin-bottom: 18px;
+}
+.instr-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.instr-step {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+  padding: 3px 0 3px 16px;
+  position: relative;
+}
+.instr-step::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+}
+.instr-step strong { color: var(--text); }
+
+.field { margin-bottom: 15px; }
+.field-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+.input-wrap {
+  display: flex;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.input-wrap:focus-within { border-color: var(--gold-border); }
+.prefix {
+  padding: 13px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold);
+  background: rgba(245,200,66,0.09);
+  border-right: 1px solid var(--border);
+  display: flex; align-items: center;
+}
+input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  padding: 13px 15px;
+  width: 100%;
+}
+input::placeholder { color: var(--muted); }
+
+.method {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 13px 15px;
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 15px;
+}
+.method-icon {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: #8B1A8B;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px;
+  font-weight: 800;
+  color: white;
+  flex-shrink: 0;
+}
+.method-name { font-weight: 600; font-size: 14px; }
+.method-desc { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+.btn-submit {
+  width: 100%;
+  background: var(--gold);
+  color: #0d0f14;
+  border: none;
+  border-radius: 13px;
+  padding: 15px;
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: transform .15s, box-shadow .2s;
+  margin-top: 4px;
+}
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,200,66,0.4); }
+.btn-submit:active { transform: translateY(0); }
+
+.btn-support {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(46,204,113,0.3);
+  border-radius: 13px;
+  padding: 13px;
+  color: var(--green);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background .2s;
+}
+.btn-support:hover { background: rgba(46,204,113,0.07); }
+
+.btn-back {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 7px 13px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.btn-back:hover { background: var(--surface2); }
+
+.status-center {
+  text-align: center;
+  padding: 22px 0 18px;
+}
+.status-icon { font-size: 52px; display: block; margin-bottom: 12px; animation: pulse 2s infinite; }
+.status-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--gold);
+  margin-bottom: 7px;
+}
+.status-desc { font-size: 13px; color: var(--muted); line-height: 1.65; }
+.progress-bar {
+  height: 4px;
+  background: var(--surface2);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-top: 16px;
+}
+.progress-fill {
+  height: 100%;
+  width: 35%;
+  background: var(--gold);
+  border-radius: 99px;
+  animation: grow .8s ease both;
+}
+
+.ref-box {
+  background: var(--surface2);
+  border: 1px solid var(--gold-border);
+  border-radius: 12px;
+  padding: 14px 15px;
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 18px 0;
+}
+.ref-label { font-size: 11px; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
+.ref-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--gold);
+}
+
+.section-label {
+  font-size: 11px;
+  letter-spacing: .08em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.detail-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-key { color: var(--muted); }
+.detail-val { font-weight: 600; text-align: right; }
+
+.prog-label {
+  font-size: 11px;
+  letter-spacing: .08em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin: 18px 0 14px;
+}
+.prog-step {
+  display: flex; align-items: flex-start; gap: 14px;
+  position: relative;
+  margin-bottom: 20px;
+}
+.prog-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 19px; top: 40px;
+  width: 2px; height: calc(100% + 4px);
+  background: var(--border);
+}
+.prog-icon {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  border: 2px solid var(--border);
+  background: var(--surface2);
+  flex-shrink: 0;
+}
+.prog-icon.done { background: rgba(46,204,113,0.15); border-color: var(--green); }
+.prog-icon.active { background: var(--gold-bg); border-color: var(--gold-border); animation: pulse 1.5s infinite; }
+.prog-name { font-weight: 600; font-size: 14px; }
+.prog-name.done { color: var(--green); }
+.prog-name.active { color: var(--gold); }
+.prog-name.pending { color: var(--muted); }
+.prog-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+footer {
+  text-align: center;
+  padding: 28px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.9;
+}
+footer strong {
+  font-family: 'Syne', sans-serif;
+  color: var(--gold);
+  font-size: 14px;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--surface2);
+  border: 1px solid var(--gold-border);
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gold);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+  z-index: 999;
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+.hidden { display: none !important; }
+
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: .55; }
+}
+@keyframes grow {
+  from { width: 0; }
+  to { width: 35%; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="logo">
+      <div class="logo-circle">💰</div>
+      <div>
+        <div class="logo-name">Kaffi<span>Pay</span></div>
+        <div class="logo-sub">Échange 1xBet ↔ Waafi · Djibouti</div>
+      </div>
+    </div>
+    <div id="headerRight">
+      <div class="badge">🔒 Sécurisé</div>
+    </div>
+  </header>
+
+  <div class="promo">
+    <div>
+      <div class="promo-label">🎁 Code promo pour réduire vos pertes :</div>
+      <div class="promo-code">kaffi10</div>
+    </div>
+    <button class="btn-copy" onclick="doCopy('kaffi10')">📋 Copier</button>
+  </div>
+
+  <div class="info-box">
+    Soumettez votre ordre de <strong>dépôt ou retrait 1xBet</strong> — un agent le traite sous <strong>5 à 15 minutes</strong>.
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tabDep" onclick="switchTab('dep')">🏦 Dépôt 1xBet</button>
+    <button class="tab" id="tabRet" onclick="switchTab('ret')">📤 Retrait 1xBet</button>
+  </div>
+
+  <!-- DÉPÔT -->
+  <div class="card" id="formDep">
+    <div class="card-title">💰 Dépôt 1xBet</div>
+    <div class="card-sub">Rechargez votre compte 1xBet via Waafi</div>
+
+    <div class="pay-box">
+      <div class="pay-box-label">📲 ENVOYEZ D'ABORD VOTRE PAIEMENT À :</div>
+      <div class="pay-row">
+        <span class="pay-key">📱 Numéro Waafi</span>
+        <span class="pay-val">
+          77043065
+          <span class="icon-btn" onclick="doCopy('77043065')" title="Copier">📋</span>
+        </span>
+      </div>
+      <div class="pay-row">
+        <span class="pay-key">👤 Nom du compte</span>
+        <span class="pay-val name">Abdirahman Abdi</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">💵 MONTANT (MIN. 50 DJF)</div>
+      <div class="input-wrap">
+        <div class="prefix">DJF</div>
+        <input type="number" id="dAmount" placeholder="Ex: 1000" min="50">
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">🎯 ID COMPTE 1XBET</div>
+      <div class="input-wrap">
+        <input type="text" id="dId" placeholder="Ex: 123456789">
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">🏷️ HASH TRANSACTION WAAFI</div>
+      <div class="input-wrap">
+        <input type="text" id="dHash" placeholder="Ex: TXN-WAAFI-XXXXXXXX">
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">📞 VOTRE NUMÉRO WAAFI (OPTIONNEL)</div>
+      <div class="input-wrap">
+        <input type="tel" id="dPhone" placeholder="Ex: 77XXXXXXX">
+      </div>
+    </div>
+
+    <button class="btn-submit" onclick="submitDep()">⚡ Soumettre l'Ordre</button>
+    <button class="btn-support">💬 Support WhatsApp — Un problème ?</button>
+  </div>
+
+  <!-- RETRAIT -->
+  <div class="card hidden" id="formRet">
+    <div class="card-title">📤 Retrait 1xBet</div>
+    <div class="card-sub">Recevez votre argent sur Waafi</div>
+
+    <div class="instr-box">
+      <div class="instr-title">📋 Instructions retrait 1xBet</div>
+      <div class="instr-step">Allez sur <strong>1xBet → Retrait</strong></div>
+      <div class="instr-step">Sélectionnez <strong>Espèces</strong></div>
+      <div class="instr-step">Choisissez ville <strong>Djibouti</strong></div>
+      <div class="instr-step">Sélectionnez rue <strong>Kaffi Activity</strong></div>
+      <div class="instr-step">Entrez montant et confirmez</div>
+      <div class="instr-step">Copiez le <strong>code de retrait</strong> ci-dessous</div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">🔑 CODE DE RETRAIT 1XBET</div>
+      <div class="input-wrap">
+        <input type="text" id="wCode" placeholder="Ex: RET-XXXXXXXX">
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-icon">W</div>
+      <div>
+        <div class="method-name">Waafi Mobile Money</div>
+        <div class="method-desc">Réception instantanée</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">📞 VOTRE NUMÉRO WAAFI</div>
+      <div class="input-wrap">
+        <input type="tel" id="wPhone" placeholder="Ex: 77XXXXXXX">
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">💵 MONTANT (MIN. 250 DJF)</div>
+      <div class="input-wrap">
+        <div class="prefix">DJF</div>
+        <input type="number" id="wAmount" placeholder="Ex: 500" min="250">
+      </div>
+    </div>
+
+    <button class="btn-submit" onclick="submitRet()">⚡ Soumettre l'Ordre</button>
+    <button class="btn-support">💬 Support WhatsApp — Un problème ?</button>
+  </div>
+
+  <!-- TRACKING -->
+  <div class="card hidden" id="trackCard">
+    <div class="status-center">
+      <span class="status-icon">⏳</span>
+      <div class="status-title">En attente de traitement</div>
+      <div class="status-desc">Votre ordre est en cours de traitement.<br>Vous serez crédité très rapidement.</div>
+      <div class="progress-bar"><div class="progress-fill"></div></div>
+    </div>
+
+    <div class="ref-box">
+      <div>
+        <div class="ref-label">Référence de votre ordre</div>
+        <div class="ref-value" id="orderRef">KP-DEP-000000</div>
+      </div>
+      <button class="btn-copy" onclick="doCopy(document.getElementById('orderRef').textContent)">📋 Copier</button>
+    </div>
+
+    <div class="section-label">Détails</div>
+    <div class="detail-row"><span class="detail-key">Type</span><span class="detail-val" id="tType">—</span></div>
+    <div class="detail-row"><span class="detail-key">Montant</span><span class="detail-val" id="tMontant">—</span></div>
+    <div class="detail-row"><span class="detail-key">Numéro Waafi</span><span class="detail-val" id="tWaafi">—</span></div>
+    <div class="detail-row"><span class="detail-key">Code retrait</span><span class="detail-val" id="tCode">—</span></div>
+    <div class="detail-row"><span class="detail-key">Date</span><span class="detail-val" id="tDate">—</span></div>
+
+    <div class="prog-label">Progression</div>
+
+    <div class="prog-step">
+      <div class="prog-icon done">✅</div>
+      <div>
+        <div class="prog-name done">Ordre soumis</div>
+        <div class="prog-desc">Demande enregistrée dans le système</div>
+      </div>
+    </div>
+    <div class="prog-step">
+      <div class="prog-icon active">⏳</div>
+      <div>
+        <div class="prog-name active">En cours de traitement</div>
+        <div class="prog-desc">Traitement en cours</div>
+      </div>
+    </div>
+    <div class="prog-step">
+      <div class="prog-icon">○</div>
+      <div>
+        <div class="prog-name pending">Envoi Waafi</div>
+        <div class="prog-desc">Argent envoyé sur votre numéro</div>
+      </div>
+    </div>
+
+    <button class="btn-support" style="margin-top:8px;">💬 Contacter le support</button>
+  </div>
+
+  <footer>
+    <strong>Kaffi Pay</strong><br>
+    © 2025 Kaffi Pay — Tous droits réservés · Djibouti
+  </footer>
+</div>
+
+<div class="toast" id="toast">📋 Copié !</div>
+
+<script>
+  var currentTab = 'dep';
+  var counter = 499000 + Math.floor(Math.random() * 999);
+
+  function el(id) { return document.getElementById(id); }
+
+  function switchTab(t) {
+    currentTab = t;
+    el('tabDep').className = 'tab' + (t === 'dep' ? ' active' : '');
+    el('tabRet').className = 'tab' + (t === 'ret' ? ' active' : '');
+    el('formDep').className = 'card' + (t === 'dep' ? '' : ' hidden');
+    el('formRet').className = 'card' + (t === 'ret' ? '' : ' hidden');
+    el('trackCard').className = 'card hidden';
+    el('headerRight').innerHTML = '<div class="badge">🔒 Sécurisé</div>';
+  }
+
+  function showToast(msg) {
+    var t = el('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 2000);
+  }
+
+  function doCopy(text) {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    showToast('📋 Copié !');
+  }
+
+  function pad(n) { return ('0' + n).slice(-2); }
+
+  function fmtDate(d) {
+    return pad(d.getDate()) + '/' + pad(d.getMonth()+1) + '/' + d.getFullYear()
+      + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
+
+  function showTrack(type, amount, phone, code) {
+    counter++;
+    var ref = 'KP-' + (type === 'dep' ? 'DEP' : 'RET') + '-' + counter;
+    el('formDep').className = 'card hidden';
+    el('formRet').className = 'card hidden';
+    el('trackCard').className = 'card';
+    el('orderRef').textContent = ref;
+    el('tType').textContent = type === 'dep' ? '🏦 Dépôt 1xBet' : '📤 Retrait 1xBet';
+    el('tMontant').textContent = amount ? amount + ' DJF' : '—';
+    el('tWaafi').textContent = phone || '—';
+    el('tCode').textContent = code || '—';
+    el('tDate').textContent = fmtDate(new Date());
+    el('headerRight').innerHTML = '<button class="btn-back" onclick="goBack()">← Retour</button>';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goBack() {
+    el('trackCard').className = 'card hidden';
+    el(currentTab === 'dep' ? 'formDep' : 'formRet').className = 'card';
+    el('headerRight').innerHTML = '<div class="badge">🔒 Sécurisé</div>';
+  }
+
+  function submitDep() {
+    var amount = el('dAmount').value;
+    var id = el('dId').value.trim();
+    var hash = el('dHash').value.trim();
+    var phone = el('dPhone').value.trim();
+    if (!amount || Number(amount) < 50) { showToast('⚠️ Montant min. 50 DJF'); return; }
+    if (!id) { showToast('⚠️ ID 1xBet requis'); return; }
+    if (!hash) { showToast('⚠️ Hash transaction requis'); return; }
+    showTrack('dep', amount, phone, null);
+  }
+
+  function submitRet() {
+    var code = el('wCode').value.trim();
+    var phone = el('wPhone').value.trim();
+    var amount = el('wAmount').value;
+    if (!code) { showToast('⚠️ Code de retrait requis'); return; }
+    if (!phone) { showToast('⚠️ Numéro Waafi requis'); return; }
+    if (!amount || Number(amount) < 250) { showToast('⚠️ Montant min. 250 DJF'); return; }
+    showTrack('ret', amount, phone, code.substring(0,6) + '...');
+  }
+</script>
+</body>
+</html>
