@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Kaffi Pay</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+<script type="module">
+// ═══════════════════════════════════════════════════
+// CONFIGURATION DE VOTRE BASE DE DONNÉES FIREBASE
+// ═══════════════════════════════════════════════════
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getFirestore, collection, doc, addDoc, getDocs, updateDoc, onSnapshot, query, orderBy, setDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCILUjQPp_wO-IJrp6WwckMRDN5ISbcexU",
+  authDomain: "kaffi-pay.firebaseapp.com",
+  projectId: "kaffi-pay",
+  storageBucket: "kaffi-pay.firebasestorage.app",
+  messagingSenderId: "747410568706",
+  appId: "1:747410568706:web:7a1f040293879a3768591b",
+  measurementId: "G-H09H043RC6"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Liaison des variables au contexte Global (window)
+window.db = db;
+window.fsCollection = collection;
+window.fsDoc = doc;
+window.fsAddDoc = addDoc;
+window.fsGetDocs = getDocs;
+window.fsUpdateDoc = updateDoc;
+window.fsOnSnapshot = onSnapshot;
+window.fsQuery = query;
+window.fsOrderBy = orderBy;
+window.fsSetDoc = setDoc;
+window.firebaseReady = true;
+
+window.dispatchEvent(new Event('firebase-ready'));
+</script>
+
+<style>
+:root{--bg:#07101e;--gold:#FFD700;--gold2:#FFC200;--text:#eef2ff;--muted:#5c7a9e;--success:#00d4a0;--error:#ff4060;--warning:#ffaa00;--whatsapp:#25d366;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 55% 40% at 5% -5%,rgba(255,215,0,0.06) 0%,transparent 55%),
+             radial-gradient(ellipse 40% 35% at 95% 100%,rgba(255,194,0,0.04) 0%,transparent 50%);}
+
+.screen{display:none;position:relative;z-index:1;}
+.screen.active{display:block;}
+.wrap{max-width:480px;margin:0 auto;padding:0 18px 60px;}
+
+/* HEADER CLIENT */
+.client-header{display:flex;align-items:center;justify-content:space-between;padding:10px 0 8px;border-bottom:1px solid rgba(255,215,0,.08);}
+.logo-area{display:flex;align-items:center;gap:13px;}
+.logo-text .logo-name{font-family:'Playfair Display',serif;font-weight:900;font-size:1.38rem;}
+.logo-text .logo-name span{color:var(--gold);}
+.logo-text .logo-slogan{font-size:.56rem;color:var(--muted);margin-top:1px;}
+.secure-badge{border-radius:999px;padding:5px 11px;font-size:.63rem;color:var(--success);font-weight:600;border:1px solid rgba(0,212,160,.2);}
+
+/* FORMULAIRES & STYLE DES ONGLETS */
+.hero{padding:12px 0 8px;}
+.hero-desc{font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:12px;padding:10px 14px;border-radius:14px;border:1px solid rgba(255,215,0,.07);background:rgba(255,215,0,.02);}
+.tabs{display:grid;grid-template-columns:1fr 1fr;border-radius:999px;padding:4px;margin-bottom:12px;border:1px solid rgba(255,215,0,.1);background:rgba(255,255,255,.02);}
+.tab-btn{padding:11px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.84rem;font-weight:600;border-radius:999px;cursor:pointer;transition:all .3s;}
+.tab-btn.active{background:rgba(255,215,0,.12);color:var(--gold);}
+.tab-content{display:none;}.tab-content.active{display:block;}
+.form-card{border-radius:18px;padding:15px;border:1px solid rgba(255,215,0,.08);background:linear-gradient(160deg,rgba(255,255,255,.03) 0%,transparent 100%);}
+.form-title{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;margin-bottom:2px;}
+.form-subtitle{font-size:.7rem;color:var(--muted);margin-bottom:14px;}
+.field{margin-bottom:10px;}
+.field label{display:flex;align-items:center;gap:5px;font-size:.66rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+.field input{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.92rem;padding:11px 14px;outline:none;transition:all .2s;}
+.field input:focus{background:rgba(255,215,0,.04);border-color:rgba(255,215,0,.22);box-shadow:0 0 0 3px rgba(255,215,0,.06);}
+.field input::placeholder{color:rgba(92,122,158,.5);}
+.help-text{display:block;font-size:11px;color:var(--muted);margin-top:4px;}
+.amount-wrap{position:relative;}
+.amount-wrap input{padding-left:56px;font-size:1.05rem;font-weight:600;}
+.currency-sym{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gold);font-weight:700;font-size:.78rem;pointer-events:none;}
+
+.info-box{border-radius:14px;padding:11px 14px;margin-bottom:10px;border:1px solid rgba(255,215,0,.1);background:rgba(255,215,0,.02);}
+.info-box-title{font-size:.75rem;font-weight:700;color:var(--gold);margin-bottom:8px;}
+.info-steps{list-style:none;}
+.info-steps li{font-size:.72rem;color:var(--muted);padding:3px 0;display:flex;gap:7px;line-height:1.5;}
+.info-steps li::before{content:'→';color:var(--gold);flex-shrink:0;}
+.submit-btn{width:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07101e;border:none;border-radius:999px;padding:13px;font-family:'DM Sans',sans-serif;font-size:.94rem;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;box-shadow:0 4px 18px rgba(255,215,0,.2);}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;}
+.loading-text{display:none;text-align:center;color:var(--gold);font-size:13px;margin-top:8px;}
+
+/* RECAPITULATIF SANS COUPURE DE TEXTE NI TRIPLE POINTS (...) */
+.summary-card{display:none;margin-top:15px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,215,0,0.1);border-radius:18px;padding:16px;}
+.summary-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--gold);text-align:center;margin-bottom:14px;}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.detail-row:last-child{border-bottom:none;}
+.detail-label{font-size:12px;color:var(--muted);text-transform:uppercase;}
+.detail-value{font-size:14px;font-weight:600;text-align:right;white-space:normal !important;word-break:break-all !important;overflow:visible !important;max-width:65%;}
+.order-highlight{color:var(--gold);font-size:18px;font-weight:800;}
+.status-tracker{margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.05);}
+.status-step{display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;}
+.status-step.success{color:var(--success);}
+.status-step.pending{color:var(--gold);}
+
+/* SUPPORT WHATSAPP */
+.support-container{margin-top:24px;text-align:center;}
+.btn-whatsapp{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:999px;background:var(--whatsapp);color:#fff;font-family:'DM Sans',sans-serif;font-size:.94rem;font-weight:700;text-decoration:none;box-shadow:0 4px 14px rgba(37,211,102,0.2);}
+</style>
+</head>
+<body>
+
+<div class="screen active" id="client-screen">
+  <div class="wrap">
+    
+    <div class="client-header">
+      <div class="logo-area">
+        <div class="logo-text">
+          <div class="logo-name">Kaffi <span>Pay</span></div>
+          <div class="logo-slogan">Transactions Automatisées Admin</div>
+        </div>
+      </div>
+      <div class="secure-badge"><i class="fa-solid fa-shield-halved"></i> SSL Sécurisé</div>
+    </div>
+
+    <div class="hero">
+      <p class="hero-desc">Veuillez renseigner les champs ci-dessous de manière exacte pour générer votre ticket sur l'interface d'administration.</p>
+    </div>
+
+    <div class="tabs" id="clientFormTabs">
+      <button class="tab-btn active" onclick="switchTab('depot')">Dépôt 1xBet</button>
+      <button class="tab-btn" onclick="switchTab('retrait')">Retrait 1xBet</button>
+    </div>
+
+    <div class="tab-content active" id="form-depot">
+      <div class="form-card">
+        <div class="form-title">Effectuer un Dépôt</div>
+        <div class="form-subtitle">Envoi direct des détails vers l'Admin</div>
+        
+        <form id="depotForm" onsubmit="return false;">
+          <div class="field">
+            <label><i class="fa-solid fa-user"></i> ID Compte Joueur 1xBet</label>
+            <input type="number" id="depot_id" placeholder="Ex: 45582910" required>
+          </div>
+          <div class="field">
+            <label><i class="fa-solid fa-phone"></i> Numéro Waafi Émetteur</label>
+            <input type="tel" id="depot_waafi" maxlength="8" placeholder="Ex: 77043065" required>
+            <small class="help-text">Doit faire 8 chiffres et commencer par 77</small>
+          </div>
+          <div class="field">
+            <label><i class="fa-solid fa-money-bill-wave"></i> Montant (DJF)</label>
+            <div class="amount-wrap">
+              <span class="currency-sym">DJF</span>
+              <input type="number" id="depot_montant" min="250" placeholder="Min. 250" required>
+            </div>
+          </div>
+          
+          <div class="info-box">
+            <div class="info-box-title">Important :</div>
+            <ul class="info-steps">
+              <li>Validez d'abord le transfert d'argent depuis votre téléphone.</li>
+              <li>Cliquez ensuite sur soumettre pour envoyer à l'administrateur.</li>
+            </ul>
+          </div>
+
+          <div class="loading-text" id="depot_loading"><i class="fa-solid fa-spinner fa-spin"></i> Enregistrement de l'ordre complet...</div>
+          <button type="button" class="submit-btn" id="depotSubmitBtn" onclick="sendOrderToAdmin('Dépôt')">Soumettre l'Ordre de Dépôt</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="tab-content" id="form-retrait">
+      <div class="form-card">
+        <div class="form-title">Demander un Retrait</div>
+        <div class="form-subtitle">Envoi direct des détails vers l'Admin</div>
+        
+        <form id="retraitForm" onsubmit="return false;">
+          <div class="field">
+            <label><i class="fa-solid fa-key"></i> Code de Retrait 1xBet (4 caractères)</label>
+            <input type="text" id="retrait_code" maxlength="4" placeholder="Ex: jK7o" required>
+            <small class="help-text">Exactement 4 lettres ou chiffres générés par l'application 1xBet</small>
+          </div>
+          <div class="field">
+            <label><i class="fa-solid fa-phone"></i> Votre Numéro Waafi Récepteur</label>
+            <input type="tel" id="retrait_waafi" maxlength="8" placeholder="Ex: 77043065" required>
+            <small class="help-text">Doit faire 8 chiffres et commencer par 77</small>
+          </div>
+          <div class="field">
+            <label><i class="fa-solid fa-money-bill-wave"></i> Montant Approuvé (DJF)</label>
+            <div class="amount-wrap">
+              <span class="currency-sym">DJF</span>
+              <input type="number" id="retrait_montant" min="250" placeholder="Min. 250" required>
+            </div>
+          </div>
+
+          <div class="info-box">
+            <div class="info-box-title">Rappel Retrait :</div>
+            <ul class="info-steps">
+              <li>Ville: Djibouti · Rue: Kaffi Activity.</li>
+              <li>L'ordre complet sera envoyé instantanément sur votre tableau d'administration.</li>
+            </ul>
+          </div>
+
+          <div class="loading-text" id="retrait_loading"><i class="fa-solid fa-spinner fa-spin"></i> Enregistrement de l'ordre complet...</div>
+          <button type="button" class="submit-btn" id="retraitSubmitBtn" onclick="sendOrderToAdmin('Retrait')">Soumettre l'Ordre de Retrait</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="summary-card" id="transactionSummary">
+      <div class="summary-title">Ordre Transmis à l'Admin</div>
+      
+      <div class="detail-row">
+        <span class="detail-label">ID Commande</span>
+        <span class="detail-value order-highlight" id="lbl_order_id">-</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Type d'opération</span>
+        <span class="detail-value" id="lbl_type" style="color:var(--gold);">-</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Compte / Code 1xBet</span>
+        <span class="detail-value" id="lbl_target">-</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Numéro Waafi</span>
+        <span class="detail-value" id="lbl_waafi">-</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Montant global</span>
+        <span class="detail-value" id="lbl_amount" style="color:var(--success);">-</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">ID Transaction (Waafi)</span>
+        <span class="detail-value" id="lbl_transfer_id">-</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Date d'enregistrement</span>
+        <span class="detail-value" id="lbl_date">-</span>
+      </div>
+
+      <div class="status-tracker">
+        <div class="status-step success">
+          <i class="fa-solid fa-circle-check"></i> Envoyé à la base de données Firestore.
+        </div>
+        <div class="status-step pending">
+          <i class="fa-solid fa-hourglass-half"></i> En attente d'approbation sur votre tableau Admin.
+        </div>
+      </div>
+    </div>
+
+    <div class="support-container">
+      <a href="https://wa.me/25377043065" target="_blank" class="btn-whatsapp">
+        <i class="fa-brands fa-whatsapp"></i> Support Client & Admin
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Permet de basculer d'un onglet à un autre
+function switchTab(type) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  
+  if(type === 'depot') {
+    document.querySelector('#clientFormTabs button:nth-child(1)').classList.add('active');
+    document.getElementById('form-depot').classList.add('active');
+  } else {
+    document.querySelector('#clientFormTabs button:nth-child(2)').classList.add('active');
+    document.getElementById('form-retrait').classList.add('active');
+  }
+}
+
+// LOGIQUE UNIFIÉE POUR ENVOYER L'ORDRE COMPLET ET DÉTAILLÉ SANS PERDRE DE SENS SUR L'ADMIN
+async function sendOrderToAdmin(type) {
+  if (!window.firebaseReady) {
+    alert("Le système Firebase est en cours d'initialisation, réessayez dans un instant...");
+    return;
+  }
+
+  let targetAccount = ""; 
+  let waafiNumber = "";
+  let amountStr = "";
+
+  const loaderElement = type === 'Dépôt' ? document.getElementById('depot_loading') : document.getElementById('retrait_loading');
+  const btnElement = type === 'Dépôt' ? document.getElementById('depotSubmitBtn') : document.getElementById('retraitSubmitBtn');
+
+  if (type === 'Dépôt') {
+    targetAccount = document.getElementById('depot_id').value.trim();
+    waafiNumber = document.getElementById('depot_waafi').value.trim();
+    amountStr = document.getElementById('depot_montant').value.trim();
+
+    if (!targetAccount) { alert("Veuillez entrer un identifiant de compte 1xBet valide."); return; }
+    if (!/^77[0-9]{6}$/.test(waafiNumber)) {
+      alert("Erreur Waafi : Le numéro émetteur doit comporter 8 chiffres et commencer par 77.");
+      return;
+    }
+  } else {
+    // Cas de Retrait
+    targetAccount = document.getElementById('retrait_code').value.trim();
+    waafiNumber = document.getElementById('retrait_waafi').value.trim();
+    amountStr = document.getElementById('retrait_montant').value.trim();
+
+    // Validation stricte du code à 4 chiffres/lettres demandée
+    if (!/^[a-zA-Z0-9]{4}$/.test(targetAccount)) {
+      alert("Erreur Format : Le code de retrait 1xBet doit comporter exactement 4 caractères alphanumériques.");
+      return;
+    }
+    if (!/^77[0-9]{6}$/.test(waafiNumber)) {
+      alert("Erreur Waafi : Le numéro récepteur doit comporter 8 chiffres et commencer par 77.");
+      return;
+    }
+  }
+
+  if (!amountStr || parseInt(amountStr) < 250) {
+    alert("Le montant minimum d'opération accepté est de 250 DJF.");
+    return;
+  }
+
+  // Blocage de l'interface graphique
+  btnElement.disabled = true;
+  loaderElement.style.display = "block";
+
+  const generatedId = Math.floor(100000 + Math.random() * 900000).toString();
+  const trackingTransferId = "TXW-" + Math.floor(100000000 + Math.random() * 900000000).toString() + "-DJ";
+  const dateString = new Date().toLocaleString('fr-FR');
+
+  try {
+    // ENVOI STRUCTURE DE TOUS LES CHAMPS POUR QUE L'ADMIN PUISSE TOUT RECEVOIR EN DETAIL
+    await window.fsAddDoc(window.fsCollection(window.db, "orders"), {
+      orderId: generatedId,
+      type: type,                          // Renseigne correctement s'il s'agit d'un "Dépôt" ou "Retrait"
+      montant: amountStr,                  // Utilisé par l'interface des statistiques administratives
+      amount: amountStr + " DJF",          // Renseigne le montant textuel
+      waafiNumber: waafiNumber,            // Numéro de téléphone de la transaction
+      withdrawalCode: type === 'Retrait' ? targetAccount : "", // Sauvegarde le code de retrait complet
+      userId1xBet: type === 'Dépôt' ? targetAccount : "",      // Sauvegarde l'ID de compte complet
+      waafiTransferId: trackingTransferId, // Identifiant unique
+      date: dateString,
+      status: "En attente",                // Statut initial lu par la liste admin
+      createdAt: new Date()                // Horodatage Firestore indispensable pour le tri temporel
+    });
+
+    // Remplissage dynamique de la carte finale affichée
+    document.getElementById('lbl_order_id').innerText = generatedId;
+    document.getElementById('lbl_type').innerText = type + " 1xBet";
+    document.getElementById('lbl_target').innerText = targetAccount;
+    document.getElementById('lbl_waafi').innerText = waafiNumber;
+    document.getElementById('lbl_amount').innerText = amountStr + " DJF";
+    document.getElementById('lbl_transfer_id').innerText = trackingTransferId;
+    document.getElementById('lbl_date').innerText = dateString;
+
+    // Masquage et basculement d'interface propre
+    document.getElementById('depotForm').style.display = "none";
+    document.getElementById('retraitForm').style.display = "none";
+    document.getElementById('clientFormTabs').style.display = "none";
+    document.querySelector('.hero').style.display = "none";
+    document.getElementById('transactionSummary').style.display = "block";
+
+  } catch (err) {
+    console.error("Échec d'insertion réseau dans Firestore:", err);
+    alert("Erreur de connexion. Impossible d'envoyer l'ordre complet à l'administrateur.");
+    btnElement.disabled = false;
+  } finally {
+    loaderElement.style.display = "none";
+  }
+}
+</script>
+
+</body>
+</html>
